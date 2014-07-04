@@ -1,4 +1,4 @@
-package ws.munday.watchfaces.face.util;
+package ws.munday.watchface.face.util;
 
 import android.os.Handler;
 import android.os.Looper;

@@ -1,4 +1,4 @@
-package ws.munday.watchfaces.face.util;
+package ws.munday.watchface.face.util;
 
 import java.util.Calendar;
 

@@ -1,4 +1,4 @@
-package ws.munday.watchfaces.face;
+package ws.munday.watchface.face;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -9,8 +9,8 @@ import android.widget.TextView;
 
 import java.util.Calendar;
 
-import ws.munday.watchfaces.face.util.Clock;
-import ws.munday.watchfaces.face.util.ClockListener;
+import ws.munday.watchface.face.util.Clock;
+import ws.munday.watchface.face.util.ClockListener;
 
 /**
  * Basic watch face example.
