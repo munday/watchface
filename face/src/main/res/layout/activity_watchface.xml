@@ -12,11 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:keepScreenOn="true"
-        android:textStyle="normal"
-        android:textSize="25sp"
-        android:gravity="top|right"
-        android:paddingTop="5dp"
-        android:paddingRight="5dp"
-        android:text="#000000"/>
+        android:textStyle="bold"
+        android:textSize="55sp"
+        android:gravity="center"
+        android:lineSpacingMultiplier="0.7"
+        android:text="00\n00\n00"/>
 
 </FrameLayout>

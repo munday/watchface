@@ -12,6 +12,7 @@ import java.util.Calendar;
 
 import ws.munday.watchface.face.util.Clock;
 import ws.munday.watchface.face.util.ClockListener;
+import ws.munday.watchface.face.util.TimeBroadcastReceiver;
 
 /**
  * Basic watch face example.
@@ -28,6 +29,11 @@ public class WatchFaceActivity extends Activity {
         }
     };
 
+    // The TimeBroadcastReceiver handles ticks when the ui would otherwise be disabled.
+    // Which is when the watch is dimmed. Unfortunately, the events are fired only once a minute.
+    private TimeBroadcastReceiver mTimeBroadcastReceiver = new TimeBroadcastReceiver(mClockListener);
+
+    // The Clock ticks once a second, but will not update the ui in the dimmed state.
     private Clock mClock = new Clock(Looper.getMainLooper(), mClockListener);
 
     @Override
@@ -40,18 +46,22 @@ public class WatchFaceActivity extends Activity {
 
         // Start the clock.
         mClock.start();
+
+        mTimeBroadcastReceiver.register(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mClock.stop();
+        mTimeBroadcastReceiver.unregister(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mIsDim = true;
+        // No need to tick once a second, so stop the clock to save battery.
+        mClock.stop();
         updateTime(Calendar.getInstance());
     }
 
@@ -59,6 +69,8 @@ public class WatchFaceActivity extends Activity {
     protected void onResume() {
         super.onResume();
         mIsDim = false;
+        // Re-enable the clock to get per second ticks.
+        mClock.start();
         updateTime(Calendar.getInstance());
     }
 
@@ -67,25 +79,16 @@ public class WatchFaceActivity extends Activity {
         int minute = calendar.get(Calendar.MINUTE);
         int second = calendar.get(Calendar.SECOND);
 
-        String time = String.format("#%02d%02d%02d", hour, minute, second);
-        String timeDim = String.format("%02d\n%02d\n%02d", hour, minute, second);
+        String color = String.format("#%02d%02d%02d", hour, minute, second);
+        String time = String.format("%02d\n%02d\n%02d", hour, minute, second);
+        String timeDim = String.format("%02d\n%02d", hour, minute);
 
-        mTextView.setBackgroundColor(Color.parseColor(time));
+        mTextView.setBackgroundColor(Color.parseColor(color));
 
         // Handle dim state.
         if (mIsDim) {
-            // Cards are no longer displayed, move the time to the center.
-            mTextView.setGravity(Gravity.CENTER);
-            mTextView.setTypeface(null, Typeface.BOLD);
-            mTextView.setLineSpacing(0.0f,0.7f);
-            mTextView.setTextSize(55);
             mTextView.setText(timeDim);
         } else {
-            // Move the time out of the way of any cards.
-            mTextView.setGravity(Gravity.TOP | Gravity.RIGHT);
-            mTextView.setTypeface(null, Typeface.NORMAL);
-            mTextView.setLineSpacing(0.0f,1f);
-            mTextView.setTextSize(25);
             mTextView.setText(time);
         }
     }
