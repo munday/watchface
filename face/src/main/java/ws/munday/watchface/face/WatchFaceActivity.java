@@ -2,10 +2,8 @@ package ws.munday.watchface.face;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Looper;
-import android.view.Gravity;
 import android.widget.TextView;
 
 import java.util.Calendar;

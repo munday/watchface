@@ -36,7 +36,7 @@ public class Clock {
     }
 
     public void stop() {
-        mHandler.removeCallbacks(mTickRunnable);
+        mHandler.removeCallbacksAndMessages(null);
     }
 
 }
