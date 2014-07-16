@@ -1,10 +1,11 @@
 package ws.munday.watchface.face;
 
 import android.app.Activity;
-import android.graphics.Color;
+import android.hardware.display.DisplayManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
-import android.widget.TextView;
+import android.view.Display;
 
 import java.util.Calendar;
 
@@ -15,15 +16,40 @@ import ws.munday.watchface.face.util.TimeBroadcastReceiver;
 /**
  * Basic watch face example.
  */
-public class WatchFaceActivity extends Activity {
+public abstract class WatchFaceActivity extends Activity {
 
-    private TextView mTextView;
-    private boolean mIsDim;
+    private DisplayManager mDisplayManager;
+    private final DisplayManager.DisplayListener mDisplayListener = new DisplayManager.DisplayListener() {
+        @Override
+        public void onDisplayAdded(int displayId) {
+
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            Display display = mDisplayManager.getDisplay(displayId);
+            switch (display.getState()) {
+                case Display.STATE_DOZING:
+                    mClock.stop();
+                    onScreenDimmed();
+                    break;
+                case Display.STATE_ON:
+                    mClock.start();
+                    onScreenOn();
+                    break;
+            }
+        }
+    };
 
     private ClockListener mClockListener = new ClockListener() {
         @Override
         public void onTimeChanged(Calendar calendar) {
-           updateTime(calendar);
+           onTimeTick(calendar);
         }
     };
 
@@ -37,57 +63,23 @@ public class WatchFaceActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Set up the UI.
-        setContentView(R.layout.activity_watchface);
-        mTextView = (TextView) findViewById(R.id.fullscreen_content);
-
-        // Start the clock.
         mClock.start();
-
+        mDisplayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
+        mDisplayManager.registerDisplayListener(mDisplayListener, new Handler());
         mTimeBroadcastReceiver.register(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mDisplayManager.unregisterDisplayListener(mDisplayListener);
         mTimeBroadcastReceiver.unregister(this);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mIsDim = true;
-        // No need to tick once a second, so stop the clock to save battery.
-        mClock.stop();
-        updateTime(Calendar.getInstance());
-    }
+    public abstract void onScreenDimmed();
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mIsDim = false;
-        // Re-enable the clock to get per second ticks.
-        mClock.start();
-        updateTime(Calendar.getInstance());
-    }
+    public abstract void onScreenOn();
 
-    private void updateTime(Calendar calendar) {
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-        int second = calendar.get(Calendar.SECOND);
+    public abstract void onTimeTick(Calendar calendar);
 
-        String color = String.format("#%02d%02d%02d", hour, minute, second);
-        String time = String.format("%02d\n%02d\n%02d", hour, minute, second);
-        String timeDim = String.format("%02d\n%02d", hour, minute);
-
-        mTextView.setBackgroundColor(Color.parseColor(color));
-
-        // Handle dim state.
-        if (mIsDim) {
-            mTextView.setText(timeDim);
-        } else {
-            mTextView.setText(time);
-        }
-    }
 }

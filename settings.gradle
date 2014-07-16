@@ -1,1 +1,1 @@
-include ':face'
+include ':hexwatch', ':face'
