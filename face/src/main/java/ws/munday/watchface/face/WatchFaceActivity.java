@@ -76,6 +76,18 @@ public abstract class WatchFaceActivity extends Activity {
         mTimeBroadcastReceiver.unregister(this);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        onScreenDimmed();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        onScreenOn();
+    }
+
     public abstract void onScreenDimmed();
 
     public abstract void onScreenOn();
